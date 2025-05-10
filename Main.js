@@ -20,6 +20,126 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
 const languageToggle = document.getElementById('languageToggle');
 let currentLanguage = 'en';
 
+// Ensure DOM is loaded before running scripts
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initializeApp);
+} else {
+    initializeApp();
+}
+
+function initializeApp() {
+    try {
+        // Language setup
+        const languageToggle = document.getElementById('languageToggle');
+        if (!languageToggle) {
+            throw new Error('Language toggle button not found');
+        }
+
+        // Initialize language first
+        updateLanguage('en');
+
+        // Canvas and animation setup
+        const canvas = document.createElement("canvas");
+        const ctx = canvas.getContext("2d");
+        const particles = [];
+        const aboutSection = document.getElementById("about");
+        const isMobile = window.innerWidth <= 768;
+
+        // Setup canvas with proper z-index
+        canvas.style.position = "fixed";
+        canvas.style.top = "0";
+        canvas.style.left = "0";
+        canvas.style.width = "100%";
+        canvas.style.height = "100%";
+        canvas.style.pointerEvents = "none";
+        canvas.style.zIndex = "0"; // Put it behind content but visible
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        document.body.prepend(canvas);
+
+        // Device-specific settings
+        const particleCount = isMobile ? 4 : 7;
+        const particleSize = isMobile ? 3 : 5;
+        const connectionDistance = isMobile ? 100 : 150;
+        const particleSpeed = isMobile ? 0.5 : 1;
+
+        // Create particles with controlled speed
+        for (let i = 0; i < particleCount; i++) {
+            particles.push({
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height,
+                vx: (Math.random() - 0.5) * particleSpeed,
+                vy: (Math.random() - 0.5) * particleSpeed
+            });
+        }
+
+        function animate() {
+            // Only hide canvas when scrolled past about section
+            if (window.scrollY >= aboutSection.offsetTop) {
+                canvas.style.opacity = '0';
+            } else {
+                canvas.style.opacity = '1';
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                
+                particles.forEach((p1, i) => {
+                    // Update positions with boundary check
+                    if (p1.x <= 0 || p1.x >= canvas.width) p1.vx *= -1;
+                    if (p1.y <= 0 || p1.y >= canvas.height) p1.vy *= -1;
+                    
+                    p1.x += p1.vx;
+                    p1.y += p1.vy;
+
+                    // Draw particle
+                    ctx.beginPath();
+                    ctx.arc(p1.x, p1.y, particleSize, 0, Math.PI * 2);
+                    ctx.fillStyle = "#808080";
+                    ctx.fill();
+
+                    // Draw connections
+                    particles.slice(i + 1).forEach(p2 => {
+                        const dx = p2.x - p1.x;
+                        const dy = p2.y - p1.y;
+                        const dist = Math.sqrt(dx * dx + dy * dy);
+                        
+                        if (dist < connectionDistance) {
+                            ctx.beginPath();
+                            ctx.moveTo(p1.x, p1.y);
+                            ctx.lineTo(p2.x, p2.y);
+                            const opacity = 1 - (dist/connectionDistance);
+                            ctx.strokeStyle = `rgba(211, 211, 211, ${opacity})`;
+                            ctx.stroke();
+                        }
+                    });
+                });
+            }
+
+            requestAnimationFrame(animate);
+        }
+
+        // Start animation
+        animate();
+
+        // Efficient resize handler
+        let resizeTimeout;
+        window.addEventListener("resize", () => {
+            clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(() => {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            }, 100);
+        });
+
+        // Language toggle event listener
+        languageToggle.addEventListener('click', () => {
+            const newLang = currentLanguage === 'en' ? 'ar' : 'en';
+            updateLanguage(newLang);
+        });
+    } catch (error) {
+        console.error('Initialization error:', error);
+    }
+}
+
+// Move translation related code outside the DOMContentLoaded
 const translations = {
     en: {
         home: "Home",
@@ -103,130 +223,31 @@ const translations = {
     }
 };
 
-// Initialize language function (move this before DOMContentLoaded)
 function updateLanguage(lang) {
-    currentLanguage = lang;
-    document.documentElement.lang = lang;
-    document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
+    try {
+        currentLanguage = lang;
+        document.documentElement.lang = lang;
+        document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
 
-    languageToggle.textContent = lang === 'en' ? 'العربية (AR)' : 'English (EN)';
+        languageToggle.textContent = lang === 'en' ? 'العربية (AR)' : 'English (EN)';
 
-    // Force re-query of elements after language change
-    requestAnimationFrame(() => {
-        document.querySelectorAll('[data-i18n]').forEach(el => {
-            const key = el.getAttribute('data-i18n');
-            if (translations[lang][key]) {
-                el.textContent = translations[lang][key];
-            }
-        });
-
-        document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
-            const key = el.getAttribute('data-i18n-placeholder');
-            if (translations[lang][key]) {
-                el.setAttribute('placeholder', translations[lang][key]);
-            }
-        });
-    });
-}
-
-document.addEventListener("DOMContentLoaded", () => {
-    // Initialize language first
-    updateLanguage('en');
-
-    // Canvas and animation setup
-    const canvas = document.createElement("canvas");
-    const ctx = canvas.getContext("2d");
-    const particles = [];
-    const aboutSection = document.getElementById("about");
-    const isMobile = window.innerWidth <= 768;
-
-    // Setup canvas with proper z-index
-    canvas.style.position = "fixed";
-    canvas.style.top = "0";
-    canvas.style.left = "0";
-    canvas.style.width = "100%";
-    canvas.style.height = "100%";
-    canvas.style.pointerEvents = "none";
-    canvas.style.zIndex = "0"; // Put it behind content but visible
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-    document.body.prepend(canvas);
-
-    // Device-specific settings
-    const particleCount = isMobile ? 4 : 7;
-    const particleSize = isMobile ? 3 : 5;
-    const connectionDistance = isMobile ? 100 : 150;
-    const particleSpeed = isMobile ? 0.5 : 1;
-
-    // Create particles with controlled speed
-    for (let i = 0; i < particleCount; i++) {
-        particles.push({
-            x: Math.random() * canvas.width,
-            y: Math.random() * canvas.height,
-            vx: (Math.random() - 0.5) * particleSpeed,
-            vy: (Math.random() - 0.5) * particleSpeed
-        });
-    }
-
-    function animate() {
-        // Only hide canvas when scrolled past about section
-        if (window.scrollY >= aboutSection.offsetTop) {
-            canvas.style.opacity = '0';
-        } else {
-            canvas.style.opacity = '1';
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            
-            particles.forEach((p1, i) => {
-                // Update positions with boundary check
-                if (p1.x <= 0 || p1.x >= canvas.width) p1.vx *= -1;
-                if (p1.y <= 0 || p1.y >= canvas.height) p1.vy *= -1;
-                
-                p1.x += p1.vx;
-                p1.y += p1.vy;
-
-                // Draw particle
-                ctx.beginPath();
-                ctx.arc(p1.x, p1.y, particleSize, 0, Math.PI * 2);
-                ctx.fillStyle = "#808080";
-                ctx.fill();
-
-                // Draw connections
-                particles.slice(i + 1).forEach(p2 => {
-                    const dx = p2.x - p1.x;
-                    const dy = p2.y - p1.y;
-                    const dist = Math.sqrt(dx * dx + dy * dy);
-                    
-                    if (dist < connectionDistance) {
-                        ctx.beginPath();
-                        ctx.moveTo(p1.x, p1.y);
-                        ctx.lineTo(p2.x, p2.y);
-                        const opacity = 1 - (dist/connectionDistance);
-                        ctx.strokeStyle = `rgba(211, 211, 211, ${opacity})`;
-                        ctx.stroke();
-                    }
-                });
+        // Force re-query of elements after language change
+        requestAnimationFrame(() => {
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (translations[lang][key]) {
+                    el.textContent = translations[lang][key];
+                }
             });
-        }
 
-        requestAnimationFrame(animate);
+            document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+                const key = el.getAttribute('data-i18n-placeholder');
+                if (translations[lang][key]) {
+                    el.setAttribute('placeholder', translations[lang][key]);
+                }
+            });
+        });
+    } catch (error) {
+        console.error('Language update error:', error);
     }
-
-    // Start animation
-    animate();
-
-    // Efficient resize handler
-    let resizeTimeout;
-    window.addEventListener("resize", () => {
-        clearTimeout(resizeTimeout);
-        resizeTimeout = setTimeout(() => {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-        }, 100);
-    });
-
-    // Language toggle event listener
-    languageToggle.addEventListener('click', () => {
-        const newLang = currentLanguage === 'en' ? 'ar' : 'en';
-        updateLanguage(newLang);
-    });
-});
+}
