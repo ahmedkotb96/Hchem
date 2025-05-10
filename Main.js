@@ -160,42 +160,41 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
         // Check if we've scrolled to About section
         if (window.scrollY >= aboutSection.offsetTop) {
-            canvas.style.display = 'none';
-        } else {
-            canvas.style.display = 'block';
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            
-            particles.forEach((p1, i) => {
-                // Update particle position and draw
-                if (p1.x < 0 || p1.x > canvas.width) p1.vx *= -1;
-                if (p1.y < 0 || p1.y > canvas.height) p1.vy *= -1;
-                
-                p1.x += p1.vx;
-                p1.y += p1.vy;
-
-                ctx.beginPath();
-                ctx.arc(p1.x, p1.y, 6, 0, Math.PI * 2);
-                ctx.fillStyle = "#808080";
-                ctx.fill();
-
-                // Draw connections
-                particles.slice(i + 1).forEach(p2 => {
-                    const dx = p2.x - p1.x;
-                    const dy = p2.y - p1.y;
-                    const dist = Math.sqrt(dx * dx + dy * dy);
-                    
-                    if (dist < 200) {
-                        ctx.beginPath();
-                        ctx.moveTo(p1.x, p1.y);
-                        ctx.lineTo(p2.x, p2.y);
-                        ctx.strokeStyle = `rgba(211, 211, 211, ${1 - dist/200})`;
-                        ctx.stroke();
-                    }
-                });
-            });
+            // Remove canvas when reaching About section
+            canvas.remove();
+            return;
         }
+
+        particles.forEach((p1, i) => {
+            if (p1.x < 0 || p1.x > canvas.width) p1.vx *= -1;
+            if (p1.y < 0 || p1.y > canvas.height) p1.vy *= -1;
+            
+            p1.x += p1.vx;
+            p1.y += p1.vy;
+
+            ctx.beginPath();
+            ctx.arc(p1.x, p1.y, 6, 0, Math.PI * 2);
+            ctx.fillStyle = "#808080";
+            ctx.fill();
+
+            particles.slice(i + 1).forEach(p2 => {
+                const dx = p2.x - p1.x;
+                const dy = p2.y - p1.y;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+                
+                if (dist < 120) {
+                    ctx.beginPath();
+                    ctx.moveTo(p1.x, p1.y);
+                    ctx.lineTo(p2.x, p2.y);
+                    ctx.strokeStyle = `rgba(211, 211, 211, ${1 - dist/200})`;
+                    ctx.stroke();
+                }
+            });
+        });
 
         requestAnimationFrame(animate);
     }
