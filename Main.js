@@ -138,9 +138,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const ctx = canvas.getContext("2d");
     const particles = [];
     const aboutSection = document.getElementById("about");
-    
-    // Check if mobile device
-    const isMobile = window.innerWidth <= 768;
 
     // Setup canvas
     canvas.style.position = "fixed";
@@ -152,33 +149,17 @@ document.addEventListener("DOMContentLoaded", () => {
     canvas.height = window.innerHeight;
     document.body.prepend(canvas);
 
-    // Adjust number of particles and size based on device
-    const particleCount = isMobile ? 4 : 7;
-    const particleSize = isMobile ? 4 : 6;
-    const connectionDistance = isMobile ? 150 : 200;
-
-    // Create particles
-    for (let i = 0; i < particleCount; i++) {
+    // Create 7 particles
+    for (let i = 0; i < 7; i++) {
         particles.push({
             x: Math.random() * canvas.width,
             y: Math.random() * canvas.height,
-            vx: (Math.random() - 0.5) * (isMobile ? 1 : 2), // Slower speed on mobile
-            vy: (Math.random() - 0.5) * (isMobile ? 1 : 2)
+            vx: (Math.random() - 0.5) * 2,
+            vy: (Math.random() - 0.5) * 2
         });
     }
 
-    // Optimize animation frame rate for mobile
-    const frameRate = isMobile ? 30 : 60;
-    let lastFrame = 0;
-
-    function animate(timestamp) {
-        // Throttle frame rate on mobile
-        if (isMobile && timestamp - lastFrame < 1000 / frameRate) {
-            requestAnimationFrame(animate);
-            return;
-        }
-        lastFrame = timestamp;
-
+    function animate() {
         // Check if we've scrolled to About section
         if (window.scrollY >= aboutSection.offsetTop) {
             canvas.style.display = 'none';
@@ -187,6 +168,7 @@ document.addEventListener("DOMContentLoaded", () => {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             
             particles.forEach((p1, i) => {
+                // Update particle position and draw
                 if (p1.x < 0 || p1.x > canvas.width) p1.vx *= -1;
                 if (p1.y < 0 || p1.y > canvas.height) p1.vy *= -1;
                 
@@ -194,20 +176,21 @@ document.addEventListener("DOMContentLoaded", () => {
                 p1.y += p1.vy;
 
                 ctx.beginPath();
-                ctx.arc(p1.x, p1.y, particleSize, 0, Math.PI * 2);
+                ctx.arc(p1.x, p1.y, 6, 0, Math.PI * 2);
                 ctx.fillStyle = "#808080";
                 ctx.fill();
 
+                // Draw connections
                 particles.slice(i + 1).forEach(p2 => {
                     const dx = p2.x - p1.x;
                     const dy = p2.y - p1.y;
                     const dist = Math.sqrt(dx * dx + dy * dy);
                     
-                    if (dist < connectionDistance) {
+                    if (dist < 200) {
                         ctx.beginPath();
                         ctx.moveTo(p1.x, p1.y);
                         ctx.lineTo(p2.x, p2.y);
-                        ctx.strokeStyle = `rgba(211, 211, 211, ${1 - dist/connectionDistance})`;
+                        ctx.strokeStyle = `rgba(211, 211, 211, ${1 - dist/200})`;
                         ctx.stroke();
                     }
                 });
@@ -219,15 +202,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
     animate();
 
-    // Handle window resize
+    // Simplified resize handler
     window.addEventListener("resize", () => {
-        const isMobileNow = window.innerWidth <= 768;
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
-        
-        // Adjust particle parameters if device type changes
-        if (isMobileNow !== isMobile) {
-            location.reload(); // Refresh to apply new mobile/desktop settings
-        }
     });
 });
