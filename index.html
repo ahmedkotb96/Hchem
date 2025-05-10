@@ -201,7 +201,14 @@
         </div>
     </footer>
 
-    <!-- JavaScript -->
-    <script src="./Main.js" type="module"></script>
+    <!-- Error monitoring -->
+    <script>
+        window.addEventListener('error', function(e) {
+            console.error('Global error:', e.message, e.filename, e.lineno);
+        });
+    </script>
+    
+    <!-- Main script with defer -->
+    <script defer src="./Main.js"></script>
 </body>
 </html>
