@@ -20,29 +20,40 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
 const languageToggle = document.getElementById('languageToggle');
 let currentLanguage = 'en';
 
-// Ensure DOM is loaded before running scripts
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initializeApp);
-} else {
-    initializeApp();
-}
+console.log('Script loading...'); // Debug loading
 
-function initializeApp() {
-    try {
-        // Language setup
+// Wrap in IIFE to avoid global scope pollution
+(function() {
+    // Initialize language function
+    function initLanguage() {
         const languageToggle = document.getElementById('languageToggle');
         if (!languageToggle) {
-            throw new Error('Language toggle button not found');
+            console.error('Language toggle not found');
+            return;
         }
-
-        // Initialize language first
+        
+        // Move language toggle listener here
+        languageToggle.addEventListener('click', () => {
+            const newLang = currentLanguage === 'en' ? 'ar' : 'en';
+            updateLanguage(newLang);
+        });
+        
+        // Initial language set
         updateLanguage('en');
+    }
 
+    // Initialize animation function
+    function initAnimation() {
+        const aboutSection = document.getElementById('about');
+        if (!aboutSection) {
+            console.error('About section not found');
+            return;
+        }
+        
         // Canvas and animation setup
         const canvas = document.createElement("canvas");
         const ctx = canvas.getContext("2d");
         const particles = [];
-        const aboutSection = document.getElementById("about");
         const isMobile = window.innerWidth <= 768;
 
         // Setup canvas with proper z-index
@@ -128,16 +139,22 @@ function initializeApp() {
                 canvas.height = window.innerHeight;
             }, 100);
         });
-
-        // Language toggle event listener
-        languageToggle.addEventListener('click', () => {
-            const newLang = currentLanguage === 'en' ? 'ar' : 'en';
-            updateLanguage(newLang);
-        });
-    } catch (error) {
-        console.error('Initialization error:', error);
     }
-}
+
+    // Main initialization
+    function init() {
+        console.log('Initializing...');
+        initLanguage();
+        initAnimation();
+    }
+
+    // Ensure proper loading
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+    } else {
+        init();
+    }
+})();
 
 // Move translation related code outside the DOMContentLoaded
 const translations = {
