@@ -45,89 +45,129 @@ console.log('Script loading...'); // Debug loading
     // Initialize animation function
     function initAnimation() {
         const aboutSection = document.getElementById('about');
-        if (!aboutSection) {
-            console.error('About section not found');
-            return;
-        }
+        if (!aboutSection) return;
         
-        // Canvas and animation setup
         const canvas = document.createElement("canvas");
         const ctx = canvas.getContext("2d");
         const particles = [];
-        const isMobile = window.innerWidth <= 768;
-
-        // Setup canvas with proper z-index
+        
+        // Setup canvas
         canvas.style.position = "fixed";
         canvas.style.top = "0";
         canvas.style.left = "0";
         canvas.style.width = "100%";
         canvas.style.height = "100%";
         canvas.style.pointerEvents = "none";
-        canvas.style.zIndex = "0"; // Put it behind content but visible
+        canvas.style.zIndex = "0";
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
         document.body.prepend(canvas);
 
-        // Device-specific settings
-        const particleCount = isMobile ? 4 : 7;
-        const particleSize = isMobile ? 3 : 5;
-        const connectionDistance = isMobile ? 100 : 150;
-        const particleSpeed = isMobile ? 0.5 : 1;
+        // Gas particle settings
+        const PARTICLE_COUNT = 12;
+        const MAX_SPEED = 2;
+        const MIN_SIZE = 7;
+        const MAX_SIZE = 12;
+        const INTERACTION_DISTANCE = 200; // Increased interaction distance
+        const PARTICLE_COLOR = 'rgba(64, 64, 64,'; // Dark gray base color
 
-        // Create particles with controlled speed
-        for (let i = 0; i < particleCount; i++) {
+        // Create gas-like particles
+        for (let i = 0; i < PARTICLE_COUNT; i++) {
             particles.push({
                 x: Math.random() * canvas.width,
                 y: Math.random() * canvas.height,
-                vx: (Math.random() - 0.5) * particleSpeed,
-                vy: (Math.random() - 0.5) * particleSpeed
+                z: Math.random() * 500,
+                size: Math.random() * (MAX_SIZE - MIN_SIZE) + MIN_SIZE,
+                vx: (Math.random() - 0.5) * MAX_SPEED,
+                vy: (Math.random() - 0.5) * MAX_SPEED,
+                vz: (Math.random() - 0.5) * MAX_SPEED
             });
         }
 
         function animate() {
-            // Only hide canvas when scrolled past about section
             if (window.scrollY >= aboutSection.offsetTop) {
                 canvas.style.opacity = '0';
             } else {
                 canvas.style.opacity = '1';
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
-                
+
+                // First, find all close particle groups
+                const connections = [];
                 particles.forEach((p1, i) => {
-                    // Update positions with boundary check
-                    if (p1.x <= 0 || p1.x >= canvas.width) p1.vx *= -1;
-                    if (p1.y <= 0 || p1.y >= canvas.height) p1.vy *= -1;
-                    
-                    p1.x += p1.vx;
-                    p1.y += p1.vy;
-
-                    // Draw particle
-                    ctx.beginPath();
-                    ctx.arc(p1.x, p1.y, particleSize, 0, Math.PI * 2);
-                    ctx.fillStyle = "#808080";
-                    ctx.fill();
-
-                    // Draw connections
-                    particles.slice(i + 1).forEach(p2 => {
+                    const closeParticles = particles.filter((p2, j) => {
+                        if (i === j) return false;
                         const dx = p2.x - p1.x;
                         const dy = p2.y - p1.y;
-                        const dist = Math.sqrt(dx * dx + dy * dy);
-                        
-                        if (dist < connectionDistance) {
-                            ctx.beginPath();
-                            ctx.moveTo(p1.x, p1.y);
-                            ctx.lineTo(p2.x, p2.y);
-                            const opacity = 1 - (dist/connectionDistance);
-                            ctx.strokeStyle = `rgba(211, 211, 211, ${opacity})`;
-                            ctx.stroke();
-                        }
+                        const dz = p2.z - p1.z;
+                        return Math.sqrt(dx * dx + dy * dy + dz * dz) < INTERACTION_DISTANCE;
                     });
+
+                    // If we found 2 or more particles close to current particle
+                    if (closeParticles.length >= 2) {
+                        connections.push({
+                            center: p1,
+                            connected: closeParticles
+                        });
+                    }
+                });
+
+                // Draw connections between particle groups
+                connections.forEach(group => {
+                    group.connected.forEach(p2 => {
+                        const dx = p2.x - group.center.x;
+                        const dy = p2.y - group.center.y;
+                        const dz = p2.z - group.center.z;
+                        const dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
+                        
+                        const opacity = (1 - dist / INTERACTION_DISTANCE) * 0.4;
+                        
+                        ctx.beginPath();
+                        ctx.moveTo(group.center.x, group.center.y);
+                        ctx.lineTo(p2.x, p2.y);
+                        ctx.strokeStyle = `rgba(64, 64, 64, ${opacity})`;
+                        ctx.lineWidth = 1;
+                        ctx.stroke();
+                    });
+                });
+
+                // Update and draw particles
+                const sortedParticles = [...particles].sort((a, b) => b.z - a.z);
+                sortedParticles.forEach(p1 => {
+                    // Update particle position
+                    p1.x += p1.vx;
+                    p1.y += p1.vy;
+                    p1.z += p1.vz;
+
+                    // Bounce off walls with energy conservation
+                    if (p1.x < 0 || p1.x > canvas.width) {
+                        p1.vx *= -0.98; // Slight energy loss
+                        p1.x = p1.x < 0 ? 0 : canvas.width;
+                    }
+                    if (p1.y < 0 || p1.y > canvas.height) {
+                        p1.vy *= -0.98;
+                        p1.y = p1.y < 0 ? 0 : canvas.height;
+                    }
+                    if (p1.z < 0 || p1.z > 500) {
+                        p1.vz *= -0.98;
+                        p1.z = p1.z < 0 ? 0 : 500;
+                    }
+
+                    // Calculate perspective scale
+                    const scale = 0.5 + (p1.z / 1000);
+                    const size = p1.size * scale;
+                    const alpha = 0.4 + (p1.z / 1000) * 0.6;
+
+                    // Draw particle with solid color instead of gradient
+                    ctx.beginPath();
+                    ctx.arc(p1.x, p1.y, size, 0, Math.PI * 2);
+                    ctx.fillStyle = `rgba(64, 64, 64, ${alpha})`;
+                    ctx.fill();
                 });
             }
 
             requestAnimationFrame(animate);
         }
 
-        // Start animation
         animate();
 
         // Efficient resize handler
@@ -155,6 +195,7 @@ console.log('Script loading...'); // Debug loading
         init();
     }
 })();
+
 
 // Move translation related code outside the DOMContentLoaded
 const translations = {
