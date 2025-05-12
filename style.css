@@ -1,0 +1,365 @@
+/* Custom CSS */
+body[dir="rtl"] {
+    font-family: 'Tajawal', sans-serif;
+}
+
+/* Mobile Menu Animation */
+.mobile-menu {
+    transition: all 0.3s ease;
+}
+
+/* Language Toggle Button */
+#languageToggle {
+    position: fixed;
+    top: 20px; /* Add more space from the top */
+    right: 20px; /* Add more space from the right */
+    z-index: 50; /* Ensure it stays above other elements */
+    padding: 12px 20px; /* Increase padding for better visibility */
+    font-size: 16px; /* Make the text larger */
+    font-weight: bold; /* Make the text bold */
+    background-color: rgb(134, 134, 246); /* Eye-catching gold background */
+    color: #ffffff; /* Black text for contrast */
+    border: 2px solid rgb(117, 114, 114); /* Add a slightly darker border */
+    border-radius: 8px; /* Rounded corners */
+    box-shadow: 0 8px 10px rgba(0, 0, 0, 0.2); /* Add a shadow for depth */
+    cursor: pointer;
+    transition: all 0.3s ease; /* Smooth transition for hover effects */
+    margin-top: 50px; /* Add spacing to ensure it doesn't overlap with other elements */
+}
+
+#languageToggle:hover {
+    background-color: #ffffff; /* Slightly darker gold on hover */
+    color: rgb(134, 134, 246); /* White text on hover */
+    box-shadow: 0 6px 8px rgba(0, 0, 0, 0.3); /* Enhance shadow on hover */
+}
+
+/* Animated Atom */
+.atom {
+    position: relative;
+    width: 100px;
+    height: 100px;
+    margin: 50px auto;
+    border-radius: 50%;
+    background: radial-gradient(circle, #4caf50 30%, #81c784 70%);
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+    animation: spin 5s linear infinite;
+}
+
+.atom::before,
+.atom::after {
+    content: '';
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    background: #ff5722;
+    border-radius: 50%;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    animation: orbit 2s linear infinite;
+}
+
+.atom::after {
+    background: #2196f3;
+    animation-delay: 1s;
+}
+
+/* Keyframes for Atom Animation */
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes orbit {
+    0% {
+        transform: translate(-50%, -50%) rotate(0deg) translateX(50px) rotate(0deg);
+    }
+    100% {
+        transform: translate(-50%, -50%) rotate(360deg) translateX(50px) rotate(-360deg);
+    }
+}
+
+/* Molecule Animation */
+.molecule {
+    position: relative;
+    width: 150px;
+    height: 150px;
+    margin: 50px auto;
+}
+
+.molecule .atom {
+    position: absolute;
+    width: 30px;
+    height: 30px;
+    background: #ff9800;
+    border-radius: 50%;
+    animation: bounce 3s ease-in-out infinite;
+}
+
+.molecule .atom:nth-child(1) {
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    animation-delay: 0s;
+}
+
+.molecule .atom:nth-child(2) {
+    top: 50%;
+    left: 0;
+    transform: translateY(-50%);
+    animation-delay: 0.5s;
+}
+
+.molecule .atom:nth-child(3) {
+    top: 50%;
+    right: 0;
+    transform: translateY(-50%);
+    animation-delay: 1s;
+}
+
+.molecule .atom:nth-child(4) {
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    animation-delay: 1.5s;
+}
+/* Animation for slow spinning */
+@keyframes spin-slow {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+/* Animation for bouncing */
+@keyframes bounce {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+.animate-bounce {
+    animation: bounce 2s ease-in-out infinite;
+}
+
+/* Contact Form Styles */
+#contact {
+    color: #00008B; /* Dark blue font color for the entire section */
+}
+
+#contact input,
+#contact textarea,
+#contact button {
+    color: #00008B; /* Dark blue font color */
+    background-color: transparent; /* Ensure background doesn't interfere */
+    border: 1px solid #00008B; /* Dark blue border */
+    padding: 10px;
+    border-radius: 5px;
+    font-size: 16px;
+}
+
+#contact input:focus,
+#contact textarea:focus,
+#contact button:focus {
+    outline: none;
+    border-color: #000066; /* Slightly darker blue for focus */
+    box-shadow: 0 0 5px #000066;
+}
+
+#contact input::placeholder,
+#contact textarea::placeholder {
+    color: #00008B; /* Dark blue placeholder text */
+}
+
+#contact button {
+    background-color: #00008B; /* Dark blue background for button */
+    color: white; /* White text for button */
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+#contact button:hover {
+    background-color: #000066; /* Slightly darker blue on hover */
+}
+
+/* Adjust spacing for the form */
+#contact form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+#contact label {
+    font-size: 14px;
+    font-weight: bold;
+    color: #00008B; /* Dark blue for labels */
+}
+
+/* Particle Animation Styles */
+.particle {
+    position: fixed;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.client-logo {
+    max-width: 100%;
+    height: auto;
+    margin-bottom: 1rem;
+}
+
+.client-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 1rem;
+    flex: 0 0 auto;
+    margin: 0 1rem;
+    width: 150px; /* Set fixed width for consistent alignment */
+    text-align: center; /* Center the text */
+}
+
+.clients-grid {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    flex-wrap: nowrap;
+    padding: 2rem;
+    width: 100%;
+    overflow-x: auto;
+}
+
+.client-card {
+    flex: 0 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 0 1rem;
+}
+
+.client-logo {
+    width: 120px;
+    height: 80px; /* Set fixed height for consistent spacing */
+    object-fit: contain;
+    margin-bottom: 1rem;
+}
+
+.client-name {
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1.2;
+    margin-top: 0.5rem;
+    min-height: 2.4em; /* Ensure consistent height for text */
+}
+
+/* Add to Cart Button Styles */
+.cart-btn {
+    background: linear-gradient(to right, #4f46e5, #3b82f6);
+    color: white;
+    font-weight: 600;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.5rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    transition: all 0.3s ease;
+    text-align: center;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.cart-btn:hover {
+    background: linear-gradient(to right, #3b82f6, #2563eb);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 8px -1px rgba(0, 0, 0, 0.1), 0 4px 6px -1px rgba(0, 0, 0, 0.06);
+}
+
+.cart-btn:active {
+    transform: translateY(0);
+}
+
+#orderNowBtn {
+    background: linear-gradient(to right, #4f46e5, #3b82f6);
+    color: rgb(114, 60, 60);
+    font-weight: 600;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.5rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    transition: all 0.3s ease;
+}
+
+#orderNowBtn:hover {
+    background: linear-gradient(to right, #3b82f6, #2563eb);
+    transform: translateY(-2px);
+}
+
+/* Product Page Styles */
+.category-pill {
+    padding: 0.5rem 1rem;
+    border-radius: 9999px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    background-color: #f3f4f6;
+    color: #374151;
+    transition: all 0.2s;
+}
+
+.category-pill:hover {
+    background-color: #e5e7eb;
+}
+
+.category-pill.active {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.product-category {
+    background-color: #f3f4f6;
+    color: #374151;
+}
+
+.product-category[data-category="chemicals"] {
+    background-color: #dbeafe;
+    color: #1e40af;
+}
+
+.product-category[data-category="media"] {
+    background-color: #dcfce7;
+    color: #166534;
+}
+
+.product-category[data-category="glassware"] {
+    background-color: #fef3c7;
+    color: #92400e;
+}
+
+@media (max-width: 768px) {
+    #languageToggle {
+        padding: 8px 12px;
+        font-size: 14px;
+        top: 10px;
+        right: 10px;
+    }
+
+    .particle {
+        opacity: 0.5; /* Reduce opacity on mobile */
+    }
+    
+    .client-logo {
+        width: 80px;
+    }
+    
+    .client-card {
+        margin: 0 0.5rem;
+    }
+}
